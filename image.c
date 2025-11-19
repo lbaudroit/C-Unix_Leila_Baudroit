@@ -19,11 +19,13 @@ void image_free(Image *img) {
 }
 
 void image_set_pixel(Image *img, int x, int y, unsigned char r, unsigned char g, unsigned char b) {
-    if (img != NULL && x >= 0 && x < img->width && y >= 0 && y < img->height) {
+	printf("%d %d %d %d %d\n", img != NULL, x >= 0, x < img -> width, y >= 0, y < img -> height);
+    if (img != NULL && x >= 0 && x < img -> width && y >= 0 && y < img -> height) {
         int index = ( y * img -> width + x ) * 3;
-        img->pixels[index + 0] = r;
-        img->pixels[index + 1] = g;
-        img->pixels[index + 2] = b;
+		printf("Ajouté à l'index %d\n", index);
+        img -> pixels[index + 0] = r;
+        img -> pixels[index + 1] = g;
+        img -> pixels[index + 2] = b;
     }
 }
 
