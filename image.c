@@ -122,3 +122,66 @@ Image* image_read_txt(const char *filename) {
     return img;
 }
 
+void image_save_bin(Image *img, const char *filename) {
+    if (img == NULL) return;
+
+    FILE *fp = fopen(filename, "w");
+
+    if (fp == NULL) {
+        perror("Erreur d'ouverture du fichier");
+        return;
+    }
+
+    fprintf(fp, "P6\n");
+
+    // Écriture des dimensions
+    fprintf(fp, "%d %d\n", img -> width, img -> height);
+
+    // Écriture de la valeur maximale
+    fprintf(fp, "255\n");
+
+    // Ecriture des pixels (sans retour à la ligne)
+    fprintf(fp, img -> pixels);
+
+    fclose(fp); // Fermeture du fichier
+    printf("Image PPM binaire créée avec succès !\n");
+}
+
+Image* image_read_bin(const char *filename) {
+    FILE *fp = fopen(filename, "r");
+    Image *img = 0;
+
+    if (fp == NULL) {
+        perror("Erreur d'ouverture du fichier");
+    }
+
+    int line_no = 1;
+    int was_read = 0;
+    int y = 0;
+    int width, height;
+
+    do {
+        int buffer_size = 0;
+        char *line = NULL;
+        was_read = getline(&line, &buffer_size, fp);
+        printf("line : %s\n", line);
+
+        /* Création de l'image avec sa longueur et largeur */
+        if (line_no == 2) {
+            sscanf(line, "%d %d", &width, &height);
+            img = image_create(width, height);
+        }
+
+        /* Valeurs des pixels */
+        if (line_no > 3) {
+            img -> pixels = line;
+        }
+
+        line_no++;
+        free(line);
+    } while (was_read != -1);
+
+    fclose(fp);
+
+    return img;
+}
