@@ -1,0 +1,10 @@
+*.o
+*.out
+*.exe
+*.a
+*.so
+filter
+gradient
+*.ppm
+first_ppm
+.idea/

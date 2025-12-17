@@ -1,4 +1,4 @@
-#include "image.h"
+#include "../image.h"
 #include <stdio.h>
 
 int main(int argc, char *argv[]) {
