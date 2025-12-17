@@ -25,9 +25,12 @@ void* thread_func(void* _args) {
         resultat += valeur * valeur + valeur;
         usleep(20);
     }
+    int64_t *aRenvoyer = malloc(sizeof(int64_t));
+    *aRenvoyer = resultat;
+
 
     printf("Traitement de %d terminé : %ld\n", valeur, resultat);
-    pthread_exit(&resultat);
+    pthread_exit(aRenvoyer);
 }
 
 int main(void) {
@@ -53,8 +56,8 @@ int main(void) {
     // TODO: Agréger les résultats
     int64_t somme_total = 0;
     for (int i = 0 ; i < TAILLE_DONNEES ; i++) {
-        int64_t *result = malloc(sizeof(int64_t));
-        pthread_join(threads[i], (void **)&result);
+        int64_t* result;
+        pthread_join(threads[i], (void**) &result);
         somme_total += *result;
     }
 
