@@ -59,7 +59,9 @@ int main(void) {
         int64_t* result;
         pthread_join(threads[i], (void**) &result);
         somme_total += *result;
+        free(result);
     }
+
 
     clock_gettime(CLOCK_MONOTONIC, &fin);
     long duree = (fin.tv_sec - debut.tv_sec) * 1000 +
