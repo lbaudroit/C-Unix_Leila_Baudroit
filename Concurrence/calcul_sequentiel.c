@@ -16,7 +16,6 @@ int main(void) {
 
     int64_t somme_total = 0;
 
-    // TODO: Ce code sera remplacé par une version parallèle
     for (int i = 0; i < TAILLE_DONNEES; i++) {
         int valeur = DONNEES[i];
 
