@@ -106,9 +106,10 @@ void* thread_consommateur(void* arg)
     return NULL;
 }
 
-
-int main(void)
+int test(int nb_producteurs, int nb_productions,
+    int nb_consommateurs, int nb_consommations)
 {
+
     sem_init(&places_libres, 0, TAILLE_BUFFER);
     sem_init(&elements_disponibles, 0, 0);
     pthread_mutex_init(&mutex, NULL);
@@ -162,4 +163,28 @@ int main(void)
     pthread_mutex_destroy(&mutex);
 
     return 0;
+}
+
+
+int main(void)
+{
+    // Scénario 1 : Équilibré (production = consommation)
+    // 3 producteurs × 10 = 30 produits
+    // 5 consommateurs × 6 = 30 consommations
+    printf("\n===Scénario 1 : équilibré===\n\n");
+    test(3, 10, 5, 6);
+
+    // Scénario 2 : Producteurs plus rapides
+    // 5 producteurs × 10 = 50 produits
+    // 2 consommateurs × 10 = 20 consommations
+    printf("\n===Scénario 2 : production rapide===\n\n");
+    test(5, 10, 5, 10);
+    // semble relativement lent
+
+    // Scénario 3 : Consommateurs plus rapides
+    // 1 producteur × 50 = 50 produits
+    // 10 consommateurs × 10 = 100 consommations
+    printf("\n===Scénario 3 : consommation rapide===\n\n");
+    test(1, 50, 10, 10);
+    // semble lent
 }
