@@ -38,8 +38,8 @@ void ajouter_buffer(int produit)
     {
         index_prod = 0;
     }
-
     sem_post(&mutex_buffer);
+    sem_post(&elements_disponibles);
 }
 
 int retirer_buffer(void)
@@ -53,6 +53,7 @@ int retirer_buffer(void)
         index_prod = TAILLE_BUFFER - 1;
     }
     sem_post(&mutex_buffer);
+    sem_post(&elements_disponibles);
     return produit;
 }
 
