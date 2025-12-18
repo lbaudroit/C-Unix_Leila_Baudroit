@@ -26,11 +26,11 @@ static int index_cons = 0;
 
 static sem_t places_libres;
 static sem_t elements_disponibles;
-static sem_t mutex_buffer; // Qulle est le soucis ici ? Ca devrait être une mutex !!
+static pthread_mutex_t mutex;
 
 void ajouter_buffer(int produit)
 {
-    sem_wait(&mutex_buffer);
+    pthread_mutex_lock(&mutex);
     // Quelle soucis peut on imaginer ici ?
     buffer[index_prod] = produit;
     index_prod++; // Circulaire : utilisez la congruence
@@ -38,22 +38,20 @@ void ajouter_buffer(int produit)
     {
         index_prod = 0;
     }
-    sem_post(&mutex_buffer);
-    sem_post(&elements_disponibles);
+    pthread_mutex_unlock(&mutex);
 }
 
 int retirer_buffer(void)
 {
-    sem_wait(&mutex_buffer);
+    pthread_mutex_lock(&mutex);
     // Quelle soucis peut on imaginer ici ?
     int produit = buffer[index_cons];
-    index_cons--; // Circulaire : utilisez la congruence
-    if (index_prod == -1)
+    index_cons++; // Circulaire : utilisez la congruence
+    if (index_cons == TAILLE_BUFFER)
     {
-        index_prod = TAILLE_BUFFER - 1;
+        index_cons = 0;
     }
-    sem_post(&mutex_buffer);
-    sem_post(&elements_disponibles);
+    pthread_mutex_unlock(&mutex);
     return produit;
 }
 
@@ -76,7 +74,7 @@ void* thread_producteur(void* arg)
 
         // TODO: 3. Signaler qu'un élément est disponible
         usleep(50);
-        sem_post(&places_libres);
+        sem_post(&elements_disponibles);
     }
 
     printf("[Producteur %d] terminé (10 produits)\n", id);
@@ -99,7 +97,7 @@ void* thread_consommateur(void* arg)
                id, produit, (index_cons - 1 + TAILLE_BUFFER) % TAILLE_BUFFER);
 
         // TODO: 3. Signaler qu'une place est libre
-        sem_post(&elements_disponibles);
+        sem_post(&places_libres);
 
         usleep(50);
     }
@@ -113,7 +111,7 @@ int main(void)
 {
     sem_init(&places_libres, 0, TAILLE_BUFFER);
     sem_init(&elements_disponibles, 0, 0);
-    sem_init(&mutex_buffer, 0, 1);
+    pthread_mutex_init(&mutex, NULL);
 
     srand(time(NULL));
 
@@ -148,25 +146,20 @@ int main(void)
     sleep(2);
 
     // Annuler les threads bloqués (pthread_cancel)
-    int bloques[2] = {0, 0};
     for (int i = 0; i < NB_PRODUCTEURS; i++)
     {
-        bloques[0] += pthread_cancel(producteurs[i]);
-    }
-    for (int i = 0; i < NB_CONSOMMATEURS; i++)
-    {
-        bloques[1] += pthread_cancel(consommateurs[i]);
+        pthread_cancel(producteurs[i]);
     }
 
-    printf("Threads bloqués : %d (%d producteurs, %d consommateurs)\n",
-           bloques[0] + bloques[1],
-           bloques[0],
-           bloques[1]);
+    for (int i = 0; i < NB_CONSOMMATEURS; i++)
+    {
+        pthread_cancel(consommateurs[i]);
+    }
 
     // Nettoyage
     sem_destroy(&places_libres);
     sem_destroy(&elements_disponibles);
-    sem_destroy(&mutex_buffer);
+    pthread_mutex_destroy(&mutex);
 
     return 0;
 }
